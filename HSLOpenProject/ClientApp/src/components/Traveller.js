@@ -1,42 +1,31 @@
-﻿import React, { useState, useEffect, Fragment } from 'react';
-import { atom, useRecoilValue, useRecoilState } from 'recoil';
-import { itinaryState } from '../atoms';
-import { fetchData } from '../helpers/DataFetchHelper';
-
-
-const URL = "https://api.digitransit.fi/geocoding/v1/autocomplete?text=";
-const URLSearch = "http://api.digitransit.fi/geocoding/v1/search";
+﻿import React, { Fragment } from 'react';
+import { useRecoilValue, useRecoilState } from 'recoil';
+import { itinaryState, allStopsState } from '../atoms';
+import { LeafletMap } from './LeafletMap';
+import { Stops } from '../helpers/GraphQLQueries';
+import { randomDestination, myLocation } from '../selectors';
+import { Itinary } from './Itinary';
 
 export function Traveller() {
-    const itinaryModel = useRecoilValue(itinaryState);
+    const [, setStops ]= useRecoilState(allStopsState)
     const [trip, setTrip] = useRecoilState(itinaryState);
+    const destination = useRecoilValue(randomDestination);
+    const location = useRecoilValue(myLocation);
     
-    const handleInputChange = (event) => {
-        const { name, value } = event.target;
-        setTrip({ ...trip, [name]: value })
-        if (value.length > 4) {
-
-            console.log(value);
-            const text = fetchData(value);
-            console.log(text);
-        }
-    }    
+    const addStops = (stops) => {
+        setStops(stops);
+    }
     return (
         <Fragment>
-            <label htmlFor="origin" id="1">Start point:</label>
-            <input
-                type="text"
-                name="origin"
-                value={itinaryModel.origin}
-                onChange={handleInputChange}
-             />
-            <label htmlFor="destination" id="2">End point:</label>
-            <input
-                type="text"
-                name="destination"
-                value={itinaryModel.destination}
-                onChange={handleInputChange}
-            />   
+            <Stops addStops={addStops} />
+            {destination != null &&
+                <p>
+                Random trip traveller selected your stop to be: {destination.name}
+                </p>
+            }     
+            <LeafletMap id="leaflet-container" />
+            <Itinary />
+            
         </Fragment>
     );
 }

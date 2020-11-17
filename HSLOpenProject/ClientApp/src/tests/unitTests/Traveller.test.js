@@ -3,8 +3,23 @@ import { shallow } from "enzyme";
 import { render, unmountComponentAtNode } from "react-dom";
 import { act } from "react-dom/test-utils";
 import pretty from "pretty";
+import { MockedProvider } from '@apollo/client/testing';
 import { Traveller } from "../../components/Traveller";
 import { RecoilRoot } from "recoil";
+import { ALL_HELSINKI_STOPS, Stops } from '../../helpers/GraphQLQueries';
+
+const mocks = [
+    {
+        request: {
+            query: ALL_HELSINKI_STOPS,
+        },
+        result: {
+            data: {
+                stops: { gtfsId: "HSL:6150219", name: "Louhosmäki", lat: 60.202282, lon: 24.358088, zoneId: "D" }
+            },
+        },
+    }
+];
 
 let container = null;
 beforeEach(() => {
@@ -24,14 +39,16 @@ it("should render a traveller", () => {
   act(() => {
     render(
       <RecoilRoot>
-        <Traveller />
+            <MockedProvider mocks={mocks} addTypename={false}>
+                <Traveller />
+            </MockedProvider>
       </RecoilRoot>,
       container
     );
   });
 
   expect(pretty(container.innerHTML)).toMatchInlineSnapshot(
-    `"<label for=\\"origin\\" id=\\"1\\">Start point:</label><input type=\\"text\\" name=\\"origin\\" value=\\"\\"><label for=\\"destination\\" id=\\"2\\">End point:</label><input type=\\"text\\" name=\\"destination\\" value=\\"\\">"`
+    ``
   );
 });
 
